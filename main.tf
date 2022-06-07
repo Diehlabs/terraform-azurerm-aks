@@ -1,0 +1,80 @@
+data "azurerm_client_config" "current" {}
+
+resource "azurerm_kubernetes_cluster" "aks" {
+  azure_policy_enabled              = true
+  dns_prefix_private_cluster        = local.dns_prefix
+  http_application_routing_enabled  = false
+  kubernetes_version                = var.kubernetes_version_number
+  location                          = module.resource_group.rg.location
+  name                              = local.cluster_name
+  private_dns_zone_id               = var.private_dns_zone_id
+  private_cluster_enabled           = true
+  resource_group_name               = module.resource_group.rg.name
+  role_based_access_control_enabled = true
+  tags                              = local.all_tags
+
+  default_node_pool {
+    name                 = "nodes"
+    tags                 = local.all_tags
+    node_count           = var.node_count
+    vm_size              = var.vm_size
+    os_disk_size_gb      = var.os_disk_size_gb
+    vnet_subnet_id       = var.subnet_id
+    type                 = var.node_pool_type
+    max_pods             = var.max_pods
+    orchestrator_version = local.orchestrator_version
+  }
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [var.msi_id]
+  }
+
+  linux_profile {
+    admin_username = var.linux_profile.username
+    ssh_key {
+      key_data = var.linux_profile.sshkey
+    }
+  }
+
+  network_profile {
+    network_plugin     = "kubenet"
+    network_policy     = "calico"
+    load_balancer_sku  = "standard"
+    docker_bridge_cidr = var.docker_bridge_cidr
+    dns_service_ip     = var.dns_service_ip
+    service_cidr       = var.service_cidr
+  }
+
+  azure_active_directory_role_based_access_control {
+    managed                = true
+    admin_group_object_ids = var.cluster_admin_ids
+    azure_rbac_enabled     = true
+  }
+
+}
+
+# resource "azurerm_kubernetes_cluster_node_pool" "default" {
+#   name                  = "default"
+#   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
+#   vm_size               = var.vm_size
+#   node_count            = var.node_count
+#   max_pods        = var.max_pods
+#   enable_auto_scaling   = false
+#   enable_node_public_ip = false
+#   tags = local.all_tags
+# }
+
+# https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks
+# resource "azurerm_log_analytics_solution" "aks" {
+#   solution_name         = "ContainerInsights"
+#   location              = var.laws.location
+#   workspace_resource_id = var.laws.id
+#   workspace_name        = var.laws.name
+#   resource_group_name   = var.resource_group.name
+
+#   plan {
+#     publisher = "Microsoft"
+#     product   = "OMSGallery/ContainerInsights"
+#   }
+# }
