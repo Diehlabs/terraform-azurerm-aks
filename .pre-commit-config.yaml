@@ -16,8 +16,7 @@ repos:
   hooks:
     - id: tflint
       args:
-        - "--module"
-        - "--config=.tflint.hcl"
+        - "--loglevel=info"
     - id: terraform-validate
     - id: terraform-fmt
 
