@@ -39,7 +39,7 @@ func TestPrivateAksModule(t *testing.T) {
 	// os.Setenv("SKIP_terraform_destroy", "true")
 
 	// TERRAFORM_CLI_PATH is exported by the HashiCorp Terraform Github Action
-	if tfcp := os.Getenv("TERRAFORM_CLI_PATH"); tfcp != "" {
+	if tfcp := os.Getenv("RUNNER_TEMP"); tfcp != "" {
 		terraformBinary = tfcp + "/terraform"
 	}
 
