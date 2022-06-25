@@ -14,17 +14,17 @@ env:
 
 jobs:
   tflint:
-    uses: Diehlabs/shared-workflows/.github/workflows/tflint.yml@main
+    uses: Diehlabs/shared-workflows/.github/workflows/tflint.yml@terratest-updates
 
   checkov:
-    uses: Diehlabs/shared-workflows/.github/workflows/checkov.yml@main
+    uses: Diehlabs/shared-workflows/.github/workflows/checkov.yml@terratest-updates
     with:
       directory: ${{ github.workspace }}
     needs: tflint
     if: success()
 
   terratest:
-    uses: Diehlabs/shared-workflows/.github/workflows/terratest.yml@main
+    uses: Diehlabs/shared-workflows/.github/workflows/terratest.yml@terratest-updates
     needs: tflint
     if: success()
     secrets:

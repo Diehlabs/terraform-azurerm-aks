@@ -26,6 +26,7 @@ var (
 )
 
 // These are env var name : env var value, as-is
+// need to add a function to set these from terratest
 var goEnvVars = map[string]string{
 	"ARM_AKS_KUBE_CONFIGS_SENSITIVE": "true",
 }
@@ -37,7 +38,8 @@ func TestPrivateAksModule(t *testing.T) {
 	// os.Setenv("SKIP_terraform_redeploy", "true")
 	// os.Setenv("SKIP_terraform_destroy", "true")
 
-	if tfcp := os.Getenv("AGENT_TEMPDIRECTORY"); tfcp != "" {
+	# TERRAFORM_CLI_PATH is exported by the HashiCorp Terraform Github Action
+	if tfcp := os.Getenv("TERRAFORM_CLI_PATH"); tfcp != "" {
 		terraformBinary = tfcp + "/terraform"
 	}
 
@@ -45,7 +47,7 @@ func TestPrivateAksModule(t *testing.T) {
 		workingDir = tfdir
 	}
 
-	if unid := os.Getenv("BUILD_BUILDID"); unid != "" {
+	if unid := os.Getenv("GITHUB_RUN_ID"); unid != "" {
 		uniqueId = unid
 	}
 
