@@ -1,0 +1,44 @@
+name: Terraform Module CI
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+env:
+  TERRAFORM_VERSION: '1.2.3'
+  TFLINT_VERSION: 'v0.38.1'
+
+jobs:
+  tflint:
+    uses: Diehlabs/shared-workflows/.github/workflows/tflint.yml@terratest-updates
+
+  checkov:
+    uses: Diehlabs/shared-workflows/.github/workflows/checkov.yml@terratest-updates
+    with:
+      directory: ${{ github.workspace }}
+    needs: tflint
+    if: success()
+
+  terratest:
+    uses: Diehlabs/shared-workflows/.github/workflows/terratest.yml@terratest-updates
+    needs: tflint
+    if: success()
+    with:
+      timeout: 30m
+      terraform_version: '1.2.3'
+    secrets:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET:  ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID:  ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID:  ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+  release:
+    uses: Diehlabs/shared-workflows/.github/workflows/github-release.yml@main
+    needs:
+      - tflint
+      - terratest
+    if: success() && github.ref == 'refs/heads/main'
