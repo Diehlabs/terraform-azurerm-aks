@@ -1,9 +1,9 @@
 locals {
   dns_prefix = replace(lower("${var.tags.product}-${var.tags.environment}"), " ", "_")
 
-  cluster_name  = replace(lower("${var.tags.product}-${var.tags.region}-${var.tags.environment}"), " ", "_")
+  cluster_name = replace(lower("${var.tags.product}-${var.tags.location}-${var.tags.environment}"), " ", "_")
+
   identity_name = format("%s-identity", local.cluster_name)
-  tenant_id     = var.az_tenant_id == "" ? data.azurerm_client_config.current.tenant_id : var.az_tenant_id
 
   # identity_id = var.identity_id == null ? azurerm_user_assigned_identity.aks[0].id : var.identity_id
 

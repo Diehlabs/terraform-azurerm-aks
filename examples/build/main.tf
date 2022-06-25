@@ -4,8 +4,8 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "terratest" {
   name     = var.rg_name
-  location = local.tags.region
-  tags     = local.tags
+  location = var.tags.location
+  tags     = local.tags_all
 }
 
 resource "tls_private_key" "example" {
@@ -18,7 +18,7 @@ resource "azurerm_virtual_network" "terratest" {
   location            = azurerm_resource_group.terratest.location
   resource_group_name = azurerm_resource_group.terratest.name
   address_space       = ["172.16.14.0/24"]
-  tags                = local.tags
+  tags                = local.tags_all
 }
 
 resource "azurerm_subnet" "terratest" {
@@ -56,14 +56,15 @@ resource "local_file" "kubeconfig" {
 module "aks_cluster" {
   source                    = "../.."
   resource_group_name       = var.rg_name
-  tags                      = local.tags
+  tags                      = var.tags
+  tags_extra                = var.tags_extra
   subnet_id                 = azurerm_subnet.terratest.id
   docker_bridge_cidr        = "192.168.0.1/16"
   dns_service_ip            = "172.16.100.126"
   service_cidr              = "172.16.100.0/25"
   node_count                = var.node_count
   kubernetes_version_number = "1.21.7"
-  location                  = var.tags.region
+  location                  = var.tags.location
   max_pods                  = 31
   linux_profile = {
     username = "adminuser"
@@ -72,6 +73,9 @@ module "aks_cluster" {
   # msi_id            = var.msi_id #data.terraform_remote_state.devtest_infra.outputs.identity.id
   cluster_admin_ids = ["9ba4a348-227d-4411-bc37-3fb81ee8bc48"]
   # laws                = data.azurerm_log_analytics_workspace.example
+  depends_on = [
+    azurerm_resource_group.terratest
+  ]
 }
 
 # data "azuread_group" "kube_admins" {

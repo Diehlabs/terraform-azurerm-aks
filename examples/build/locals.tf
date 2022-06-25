@@ -2,7 +2,10 @@ locals {
 
   # msi_obj_id = "fdd3f20b-18e3-4c89-a6e9-c4ddc2265616"
 
-  tags = var.tags
+  tags_all = merge(
+    var.tags,
+    var.tags_extra
+  )
   # subnet_list = {
   #   nonprod = {
   #     subnets = [

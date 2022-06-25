@@ -17,3 +17,7 @@ variable "node_count" {
 variable "tags" {
   type = map(any)
 }
+
+variable "tags_extra" {
+  type = map(any)
+}

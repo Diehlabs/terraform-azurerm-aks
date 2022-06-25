@@ -1,12 +1,11 @@
 variable "tags" {
   description = "Tag information to be assigned to resources created."
   type = object({
-    product           = string
-    cost_center       = string
-    environment       = string
-    region            = string
-    owner             = string
-    technical_contact = string
+    product     = string
+    product_id  = string
+    environment = string
+    location    = string
+    owner       = string
   })
 }
 
@@ -90,12 +89,6 @@ variable "node_pool_type" {
   type        = string
   description = "The node pool type for the AKS cluster"
   default     = "VirtualMachineScaleSets"
-}
-
-variable "az_tenant_id" {
-  type        = string
-  description = "The Azure subscription tenant ID. Defaults to the tenant ID that is input to the azurerm provider in the root module."
-  default     = ""
 }
 
 variable "linux_profile" {

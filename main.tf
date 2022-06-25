@@ -1,4 +1,9 @@
-data "azurerm_client_config" "current" {}
+resource "azurerm_user_assigned_identity" "aks" {
+  count               = var.create_msi ? 1 : 0
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  name                = local.identity_name
+}
 
 resource "azurerm_kubernetes_cluster" "aks" {
   azure_policy_enabled = true
@@ -83,10 +88,3 @@ resource "azurerm_kubernetes_cluster" "aks" {
 #     product   = "OMSGallery/ContainerInsights"
 #   }
 # }
-
-resource "azurerm_user_assigned_identity" "aks" {
-  count               = var.create_msi ? 1 : 0
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  name                = local.identity_name
-}

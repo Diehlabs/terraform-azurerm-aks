@@ -4,7 +4,7 @@ variable "tags" {
     product           = string
     cost_center       = string
     environment       = string
-    region            = string
+    location          = string
     owner             = string
     technical_contact = string
   })
