@@ -40,12 +40,16 @@ resource "azurerm_kubernetes_cluster" "aks" {
     )
   }
 
-  linux_profile {
-    admin_username = var.linux_profile.username
-    ssh_key {
-      key_data = var.linux_profile.sshkey
-    }
-  }
+
+  # make this optional based on new - var.local_account_disabled ?
+  # linux_profile {
+  #   admin_username = var.linux_profile.username
+  #   ssh_key {
+  #     key_data = var.linux_profile.sshkey
+  #   }
+  # }
+
+  local_account_disabled = true
 
   network_profile {
     network_plugin     = "kubenet"

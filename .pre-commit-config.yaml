@@ -25,3 +25,9 @@ repos:
   hooks:
     - id: terraform-docs-system
       args: ["markdown", "--output-file", "README.md", "./"]
+
+- repo: https://github.com/bridgecrewio/checkov.git
+  rev: '2.1.7'
+  hooks:
+  - id: checkov
+    args: [--config, '.checkov.yaml']
