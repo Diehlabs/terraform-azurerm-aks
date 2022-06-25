@@ -1,4 +1,5 @@
 # terraform-azurerm-aks
+[![Terraform Module CI](https://github.com/Diehlabs/terraform-azurerm-aks/actions/workflows/terraform-module-ci.yml/badge.svg)](https://github.com/Diehlabs/terraform-azurerm-aks/actions/workflows/terraform-module-ci.yml)
 
 A basic AKS cluster module
 

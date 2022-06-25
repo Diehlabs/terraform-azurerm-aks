@@ -1,4 +1,4 @@
-name: Terraform Module Build
+name: Terraform Module CI
 on:
   push:
     branches:
