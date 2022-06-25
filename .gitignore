@@ -5,7 +5,6 @@
 *.tfstate*
 .vscode
 
-**/.terraform.lock.hcl
 *.log
 *.OLD
 *.pdf
