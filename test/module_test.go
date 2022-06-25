@@ -19,29 +19,11 @@ import (
 )
 
 var (
-	roleID          = os.Getenv("VAULT_APPROLE_ID")
-	wrappedToken    = os.Getenv("VAULT_WRAPPED_TOKEN")
-	vaultSecretPath = "cloudauto/data/terraform/nonprod/azure/svcazsp-cloudauto-terratest-devtest-terraform-managed"
-
 	uniqueId           = random.UniqueId()
-	terraformBinary    = "/usr/local/bin/terraform"
+	terraformBinary    = "/opt/homebrew/bin/terraform"
 	workingDir         = "../examples/build"
 	expectedAgentCount = 2
 )
-
-// We want to set a bunch of env vars, some from vault some from static values:
-
-// These are env var name : env var value from vault
-var vaultSecretMap = map[string]string{
-	"ARM_CLIENT_ID":         "client_id",
-	"ARM_CLIENT_SECRET":     "client_secret",
-	"ARM_TENANT_ID":         "tenant_id",
-	"ARM_SUBSCRIPTION_ID":   "subscription_id",
-	"AZURE_CLIENT_ID":       "client_id",
-	"AZURE_CLIENT_SECRET":   "client_secret",
-	"AZURE_TENANT_ID":       "tenant_id",
-	"AZURE_SUBSCRIPTION_ID": "subscription_id",
-}
 
 // These are env var name : env var value, as-is
 var goEnvVars = map[string]string{
@@ -76,14 +58,15 @@ func TestPrivateAksModule(t *testing.T) {
 		"unique_id":  uniqueId,
 		"rg_name":    fmt.Sprintf("aks-terratest-%s", uniqueId), //fmt.Sprintf("terratest-%s", uniqueId),
 		"node_count": expectedAgentCount,
-		"msi_id":     "/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<identityname>",
 		"tags": map[string]string{
-			"cost_center":       "01245",
-			"environment":       "nonprod",
-			"owner":             "Chris Diehl",
-			"technical_contact": "devops@diehlabs.com",
-			"product":           "terratest",
-			"region":            "westus",
+			"environment": "test",
+			"owner":       "Chris Diehl",
+			"product":     "terratest",
+			"product_id":  "001",
+			"location":    "westus",
+		},
+		"tags_extra": map[string]string{
+			"unique_id": uniqueId,
 		},
 	}
 
@@ -92,19 +75,9 @@ func TestPrivateAksModule(t *testing.T) {
 	// terraformOptions := setupTesting(t, workingDir, terraformBinary, terraformVars, roleID, wrappedToken, vaultSecretPath, vaultSecretMap)
 
 	// return terraformOptions if using cluster tests
-	// terraformOptions := SetupTesting(t, workingDir, terraformBinary, terraformVars, terraformEnvVars)
+	terraformOptions := SetupTesting(t, workingDir, terraformBinary, terraformVars, terraformEnvVars)
 	// don't return if not using cluster tests
-	SetupTesting(t, workingDir, terraformBinary, terraformVars, terraformEnvVars)
-
-	SetAzureEnvVars(t, roleID, wrappedToken, vaultSecretPath, vaultSecretMap)
-
-	// get secrets
-	// getSpn, err := terratest_helper.GetSecretWithAppRole(roleId, secretId, vaultSecretPath)
-	// if err != nil {
-	// 	fmt.Print(err)
-	// 	panic(err)
-	// }
-	// fmt.Sprintf("Using SPN: %s", getSpn)
+	// SetupTesting(t, workingDir, terraformBinary, terraformVars, terraformEnvVars)
 
 	// Destroy the infra after testing is finished
 	defer test_structure.RunTestStage(t, "terraform_destroy", func() {
@@ -118,21 +91,14 @@ func TestPrivateAksModule(t *testing.T) {
 
 	// the module generates the cluster name, so we get the expected name from the outputs of the test configuration
 	// expectedClusterName := terraform.Output(t, terraformOptions, "cluster_name")
-	// expectedResourceGroupName := terraformOptions.Vars["rg_name"].(string)
+	expectedClusterName := fmt.Sprintf("terratest-westus-test")
+	expectedResourceGroupName := terraformOptions.Vars["rg_name"].(string)
 
-	// run tests
-	// test_structure.RunTestStage(t, "run_tests", func() {
-	// 	t.Run("Misc k8s cluster tests", func(t *testing.T) {
-	// 		testCluster(t, workingDir, expectedResourceGroupName, expectedClusterName)
-	// 	})
-	// })
-
-	// t.Run("Misc k8s cluster tests", func(t *testing.T) {
-	// 	testCluster(t, workingDir, expectedResourceGroupName, expectedClusterName)
-	// })
-	// test_structure.RunTestStage(t, "cluster_tests", func() {
-	// 	testCluster(t, workingDir, expectedResourceGroupName, expectedClusterName)
-	// })
+	test_structure.RunTestStage(t, "run_tests", func() {
+		t.Run("Misc k8s cluster tests", func(t *testing.T) {
+			testCluster(t, workingDir, expectedResourceGroupName, expectedClusterName)
+		})
+	})
 
 	// Redeploy using Terraform and ensure idempotency
 	test_structure.RunTestStage(t, "terraform_redeploy", func() {
@@ -141,8 +107,12 @@ func TestPrivateAksModule(t *testing.T) {
 
 }
 
+// func setAzSdkVars() {
+// 	os.Setenv("AZ")
+// }
+
 func deployIngress(t *testing.T) {
-	kubeResourcePath, err := filepath.Abs(workingDir + "/deployments/nginx-ingress.yaml")
+	kubeResourcePath, err := filepath.Abs(workingDir + "/deployments/nginx-deployment.yaml")
 	require.NoError(t, err)
 
 	options := k8s.NewKubectlOptions("", fmt.Sprintf("%s/kubeconfig", workingDir), "ingress-nginx")
@@ -162,7 +132,7 @@ func testCluster(t *testing.T, workingDir string, resourceGroupName string, expe
 	assert.Equal(t, int32(expectedAgentCount), actualCount)
 
 	// deploy nginx ingress controller for testing
-	deployIngress(t)
+	// deployIngress(t)
 
 	// Path to the Kubernetes resource config we will test
 	kubeResourcePath, err := filepath.Abs(workingDir + "/deployments/nginx-deployment.yaml")
@@ -199,7 +169,7 @@ func testCluster(t *testing.T, workingDir string, resourceGroupName string, expe
 	k8s.WaitUntilServiceAvailable(t, options, "nginx-service", 10, 20*time.Second)
 	// Now we verify that the service will successfully boot and start serving requests
 	service := k8s.GetService(t, options, "nginx-service")
-	endpoint := k8s.GetServiceEndpoint(t, options, service, 443)
+	endpoint := k8s.GetServiceEndpoint(t, options, service, 80)
 
 	// Setup a TLS configuration to submit with the helper, a blank struct is acceptable
 	tlsConfig := tls.Config{}

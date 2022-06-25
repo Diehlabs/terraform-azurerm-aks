@@ -16,6 +16,11 @@ variable "tags_extra" {
   default     = {}
 }
 
+variable "resource_group_name" {
+  type        = string
+  description = "Name of the resource group to create the cluster in"
+}
+
 variable "location" {
   description = "The location for creating resources"
   type        = string
@@ -101,12 +106,6 @@ variable "linux_profile" {
   })
 }
 
-# variable "nsg_rules" {
-#   description = "List of NSG rules to create"
-#   type        = map(any)
-#   default     = {}
-# }
-
 variable "docker_bridge_cidr" {
   type        = string
   description = "IP address (in CIDR notation) used as the Docker bridge IP address on nodes. Changing this forces a new resource to be created."
@@ -125,7 +124,7 @@ variable "service_cidr" {
 variable "private_cluster_enabled" {
   type        = bool
   description = "This provides a Private IP Address for the Kubernetes API on the Virtual Network where the Kubernetes Cluster is located. Defaults to false. Changing this forces a new resource to be created."
-  default     = true
+  default     = false
 }
 
 variable "cluster_admin_ids" {
@@ -145,8 +144,20 @@ variable "max_pods" {
 
 # variable "spn_id" {}
 # variable "spn_secret" {}
-variable "private_dns_zone_id" {}
-variable "msi_id" {}
+variable "private_dns_zone_id" {
+  default = null
+}
+variable "msi_ids" {
+  description = "List of optional MSI IDs to assign to the cluster"
+  type        = list(string)
+  default     = []
+}
+
+variable "create_msi" {
+  description = "Create a unique MSI for this cluster"
+  type        = bool
+  default     = true
+}
 
 variable "orchestrator_version" {
   description = "The version of Kubernetes to install on nodes"

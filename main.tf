@@ -1,15 +1,17 @@
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_kubernetes_cluster" "aks" {
-  azure_policy_enabled              = true
-  dns_prefix_private_cluster        = local.dns_prefix
-  http_application_routing_enabled  = false
-  kubernetes_version                = var.kubernetes_version_number
-  location                          = module.resource_group.rg.location
-  name                              = local.cluster_name
-  private_dns_zone_id               = var.private_dns_zone_id
-  private_cluster_enabled           = true
-  resource_group_name               = module.resource_group.rg.name
+  azure_policy_enabled = true
+  # dns_prefix_private_cluster       = local.dns_prefix
+  http_application_routing_enabled = false
+  kubernetes_version               = var.kubernetes_version_number
+  location                         = var.location
+  name                             = local.cluster_name
+  # private_dns_zone_id               = var.private_dns_zone_id
+  # dns_prefix is required if not a private cluster
+  dns_prefix                        = "diehl"
+  private_cluster_enabled           = false
+  resource_group_name               = var.resource_group_name
   role_based_access_control_enabled = true
   tags                              = local.all_tags
 
@@ -26,8 +28,11 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   identity {
-    type         = "UserAssigned"
-    identity_ids = [var.msi_id]
+    type = "UserAssigned"
+    identity_ids = var.create_msi == false ? var.msi_ids : concat(
+      var.msi_ids,
+      [azurerm_user_assigned_identity.aks[0].id],
+    )
   }
 
   linux_profile {
@@ -78,3 +83,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
 #     product   = "OMSGallery/ContainerInsights"
 #   }
 # }
+
+resource "azurerm_user_assigned_identity" "aks" {
+  count               = var.create_msi ? 1 : 0
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  name                = local.identity_name
+}

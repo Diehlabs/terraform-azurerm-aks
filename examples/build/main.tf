@@ -2,7 +2,7 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "example" {
+resource "azurerm_resource_group" "terratest" {
   name     = var.rg_name
   location = local.tags.region
   tags     = local.tags
@@ -11,6 +11,21 @@ resource "azurerm_resource_group" "example" {
 resource "tls_private_key" "example" {
   algorithm = "RSA"
   rsa_bits  = 2048
+}
+
+resource "azurerm_virtual_network" "terratest" {
+  name                = "vnet-terratest-${var.unique_id}"
+  location            = azurerm_resource_group.terratest.location
+  resource_group_name = azurerm_resource_group.terratest.name
+  address_space       = ["172.16.14.0/24"]
+  tags                = local.tags
+}
+
+resource "azurerm_subnet" "terratest" {
+  name                 = "subnet-terratest-${var.unique_id}"
+  resource_group_name  = azurerm_resource_group.terratest.name
+  virtual_network_name = azurerm_virtual_network.terratest.name
+  address_prefixes     = ["172.16.14.0/24"]
 }
 
 resource "local_file" "ssh_private_key" {
@@ -40,8 +55,9 @@ resource "local_file" "kubeconfig" {
 
 module "aks_cluster" {
   source                    = "../.."
+  resource_group_name       = var.rg_name
   tags                      = local.tags
-  subnet_id                 = data.terraform_remote_state.devtest_network.outputs.subnets["terratest"].id
+  subnet_id                 = azurerm_subnet.terratest.id
   docker_bridge_cidr        = "192.168.0.1/16"
   dns_service_ip            = "172.16.100.126"
   service_cidr              = "172.16.100.0/25"
@@ -53,18 +69,9 @@ module "aks_cluster" {
     username = "adminuser"
     sshkey   = tls_private_key.example.public_key_openssh
   }
-  msi_id            = var.msi_id                               #data.terraform_remote_state.devtest_infra.outputs.identity.id
-  cluster_admin_ids = [data.azuread_group.kube_admins.object_id]
+  # msi_id            = var.msi_id #data.terraform_remote_state.devtest_infra.outputs.identity.id
+  cluster_admin_ids = ["9ba4a348-227d-4411-bc37-3fb81ee8bc48"]
   # laws                = data.azurerm_log_analytics_workspace.example
-  private_dns_zone_id = "/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Network/privateDnsZones/privatelink.${local.tags.region}.azmk8s.io"
-  resource_group = {
-    name     = var.rg_name
-    location = var.tags.region
-  }
-  depends_on = [
-    # data.azurerm_resource_group.example
-    azurerm_resource_group.example
-  ]
 }
 
 # data "azuread_group" "kube_admins" {
