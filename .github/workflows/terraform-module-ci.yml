@@ -19,7 +19,7 @@ jobs:
   checkov:
     uses: Diehlabs/shared-workflows/.github/workflows/checkov.yml@main
     with:
-      directory: ${{ github.workspace }}/examples/build
+      directory: ${{ github.workspace }}
     needs: tflint
     if: success()
 
