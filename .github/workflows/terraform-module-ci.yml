@@ -27,6 +27,8 @@ jobs:
     uses: Diehlabs/shared-workflows/.github/workflows/terratest.yml@terratest-updates
     needs: tflint
     if: success()
+    with:
+      terraform_version: ${{ env.TERRAFORM_VERSION }}
     secrets:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET:  ${{ secrets.ARM_CLIENT_SECRET }}
