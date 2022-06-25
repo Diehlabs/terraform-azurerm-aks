@@ -1,6 +1,6 @@
-# terraform-<provider>-<module name>
+# terraform-azurerm-aks
 
-This repo will be used as a template for new Terraform module Github repos.
+A basic AKS cluster module
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
