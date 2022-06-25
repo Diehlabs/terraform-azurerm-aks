@@ -97,6 +97,10 @@ variable "linux_profile" {
     username = string,
     sshkey   = string
   })
+  default = {
+    username = null,
+    sshkey   = null
+  }
 }
 
 variable "docker_bridge_cidr" {
@@ -156,4 +160,10 @@ variable "orchestrator_version" {
   description = "The version of Kubernetes to install on nodes"
   type        = string
   default     = null
+}
+
+variable "local_account_disabled" {
+  type        = bool
+  default     = true
+  description = "Disable local admin - this will mean the admin kubeconf will not be usable"
 }

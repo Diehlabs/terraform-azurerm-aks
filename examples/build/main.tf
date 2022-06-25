@@ -28,11 +28,11 @@ resource "azurerm_subnet" "terratest" {
   address_prefixes     = ["172.16.14.0/24"]
 }
 
-resource "local_file" "ssh_private_key" {
-  content         = tls_private_key.example.private_key_pem
-  filename        = "adminuser_rsa.key"
-  file_permission = "0600"
-}
+# resource "local_file" "ssh_private_key" {
+#   content         = tls_private_key.example.private_key_pem
+#   filename        = "adminuser_rsa.key"
+#   file_permission = "0600"
+# }
 
 resource "local_file" "kubeconfig" {
   content         = module.aks_cluster.kube_admin_config
@@ -66,10 +66,7 @@ module "aks_cluster" {
   kubernetes_version_number = "1.21.7"
   location                  = var.tags.location
   max_pods                  = 31
-  linux_profile = {
-    username = "adminuser"
-    sshkey   = tls_private_key.example.public_key_openssh
-  }
+  local_account_disabled    = false
   # msi_id            = var.msi_id #data.terraform_remote_state.devtest_infra.outputs.identity.id
   cluster_admin_ids = ["9ba4a348-227d-4411-bc37-3fb81ee8bc48"]
   # laws                = data.azurerm_log_analytics_workspace.example

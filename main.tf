@@ -49,7 +49,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   #   }
   # }
 
-  local_account_disabled = true
+  local_account_disabled = var.local_account_disabled
 
   network_profile {
     network_plugin     = "kubenet"
