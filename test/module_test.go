@@ -123,6 +123,8 @@ func deployIngress(t *testing.T) {
 
 // to skip execution "export SKIP_test_resources=true" in terminal
 func testCluster(t *testing.T, workingDir string, resourceGroupName string, expectedClusterName string) {
+	SetAzSdkEnvVars()
+
 	// Look up the cluster node count
 	cluster, err := azure.GetManagedClusterE(t, resourceGroupName, expectedClusterName, "")
 	require.NoError(t, err)

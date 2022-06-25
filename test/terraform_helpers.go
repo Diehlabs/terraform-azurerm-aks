@@ -1,6 +1,7 @@
 package test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/logger"
@@ -57,4 +58,11 @@ func TerraformDestroy(t *testing.T, workingDir string) {
 		terraform.Destroy(t, terraformOptions)
 	})
 	test_structure.CleanupTestDataFolder(t, workingDir)
+}
+
+func SetAzSdkEnvVars() {
+	os.Setenv("AZURE_CLIENT_ID", os.Getenv("ARM_CLIENT_ID"))
+	os.Setenv("AZURE_CLIENT_SECRET", os.Getenv("ARM_CLIENT_SECRET"))
+	os.Setenv("AZURE_TENANT_ID", os.Getenv("AZURE_TENANT_ID"))
+	os.Setenv("AZURE_SUBSCRIPTION_ID", os.Getenv("AZURE_SUBSCRIPTION_ID"))
 }
