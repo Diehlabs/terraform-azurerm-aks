@@ -35,10 +35,3 @@ jobs:
       ARM_CLIENT_SECRET:  ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_TENANT_ID:  ${{ secrets.ARM_TENANT_ID }}
       ARM_SUBSCRIPTION_ID:  ${{ secrets.ARM_SUBSCRIPTION_ID }}
-
-  release:
-    uses: Diehlabs/shared-workflows/.github/workflows/github-release.yml@main
-    needs:
-      - tflint
-      - terratest
-    if: success() && github.ref == 'refs/heads/main'
