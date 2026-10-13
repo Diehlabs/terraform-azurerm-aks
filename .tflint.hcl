@@ -1,11 +1,11 @@
 config {
-  module = true
+  call_module_type = "all"
   force = false
   disabled_by_default = false
 }
 
 plugin "azurerm" {
   enabled = true
-  version = "0.17.0"
+  version = "0.32.0"
   source  = "github.com/terraform-linters/tflint-ruleset-azurerm"
 }

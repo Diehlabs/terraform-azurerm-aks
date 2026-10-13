@@ -12,10 +12,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
   kubernetes_version               = var.kubernetes_version_number
   location                         = var.location
   name                             = local.cluster_name
-  # private_dns_zone_id               = var.private_dns_zone_id
+  private_dns_zone_id              = var.private_dns_zone_id
   # dns_prefix is required if not a private cluster
   dns_prefix                        = "diehl"
-  private_cluster_enabled           = false
+  private_cluster_enabled           = var.private_cluster_enabled
   resource_group_name               = var.resource_group_name
   role_based_access_control_enabled = true
   tags                              = local.all_tags
@@ -41,13 +41,15 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
 
-  # make this optional based on new - var.local_account_disabled ?
-  # linux_profile {
-  #   admin_username = var.linux_profile.username
-  #   ssh_key {
-  #     key_data = var.linux_profile.sshkey
-  #   }
-  # }
+  dynamic "linux_profile" {
+    for_each = var.linux_profile.username == null ? [] : [var.linux_profile]
+    content {
+      admin_username = linux_profile.value.username
+      ssh_key {
+        key_data = linux_profile.value.sshkey
+      }
+    }
+  }
 
   local_account_disabled = var.local_account_disabled
 

@@ -34,21 +34,6 @@ variable "location" {
 #   # }
 # }
 
-variable "resource_group" {
-  description = <<EOD
-  (Optional) the resource group object to create resources in.
-  One will be created if none is provided.
-EOD
-  type = object({
-    name     = string
-    location = string
-  })
-  default = {
-    name     = null
-    location = null
-  }
-}
-
 # variable "laws" {
 #   description = "The log analytics workspace to be used for the AKS cluster."
 #   type = object({
@@ -130,6 +115,7 @@ variable "cluster_admin_ids" {
 }
 
 variable "max_pods" {
+  type        = number
   description = "Max pods per node. 1 IP address reserved per (this value x number of nodes)"
   default     = 30
 }
@@ -142,7 +128,9 @@ variable "max_pods" {
 # variable "spn_id" {}
 # variable "spn_secret" {}
 variable "private_dns_zone_id" {
-  default = null
+  type        = string
+  description = "ID of the Private DNS Zone for a private cluster. Only used when private_cluster_enabled is true."
+  default     = null
 }
 variable "msi_ids" {
   description = "List of optional MSI IDs to assign to the cluster"

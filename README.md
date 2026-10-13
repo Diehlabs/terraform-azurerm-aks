@@ -46,8 +46,7 @@ No modules.
 | <a name="input_orchestrator_version"></a> [orchestrator\_version](#input\_orchestrator\_version) | The version of Kubernetes to install on nodes | `string` | `null` | no |
 | <a name="input_os_disk_size_gb"></a> [os\_disk\_size\_gb](#input\_os\_disk\_size\_gb) | OS disk size for AKS cluster nodes | `number` | `30` | no |
 | <a name="input_private_cluster_enabled"></a> [private\_cluster\_enabled](#input\_private\_cluster\_enabled) | This provides a Private IP Address for the Kubernetes API on the Virtual Network where the Kubernetes Cluster is located. Defaults to false. Changing this forces a new resource to be created. | `bool` | `false` | no |
-| <a name="input_private_dns_zone_id"></a> [private\_dns\_zone\_id](#input\_private\_dns\_zone\_id) | variable "spn\_id" {} variable "spn\_secret" {} | `any` | `null` | no |
-| <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | (Optional) the resource group object to create resources in.<br>  One will be created if none is provided. | <pre>object({<br>    name     = string<br>    location = string<br>  })</pre> | <pre>{<br>  "location": null,<br>  "name": null<br>}</pre> | no |
+| <a name="input_private_dns_zone_id"></a> [private\_dns\_zone\_id](#input\_private\_dns\_zone\_id) | ID of the Private DNS Zone for a private cluster. Only used when private\_cluster\_enabled is true. | `string` | `null` | no |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group to create the cluster in | `string` | n/a | yes |
 | <a name="input_service_cidr"></a> [service\_cidr](#input\_service\_cidr) | The Network Range used by the Kubernetes service. Changing this forces a new resource to be created. | `string` | n/a | yes |
 | <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id) | ID for the subnet the cluster will be placed in | `string` | n/a | yes |
