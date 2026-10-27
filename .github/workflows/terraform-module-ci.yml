@@ -5,33 +5,20 @@ on:
       - '**'
   pull_request:
     branches:
-      - 'main'
+      - main
   workflow_dispatch:
 
-env:
-  TERRAFORM_VERSION: '1.2.3'
-  TFLINT_VERSION: 'v0.38.1'
+permissions:
+  contents: read
 
 jobs:
-  tflint:
-    uses: Diehlabs/shared-workflows/.github/workflows/tflint.yml@main
-
-  checkov:
-    uses: Diehlabs/shared-workflows/.github/workflows/checkov.yml@main
+  ci:
+    permissions:
+      contents: write
+      checks: write
+      security-events: write
+    uses: Diehlabs/shared-workflows/.github/workflows/terraform-module.yml@v0.2.13
     with:
-      directory: ${{ github.workspace }}
-    needs: tflint
-    if: success()
-
-  terratest:
-    uses: Diehlabs/shared-workflows/.github/workflows/terratest.yml@main
-    needs: tflint
-    if: success()
-    with:
-      timeout: 30m
-      terraform_version: '1.2.3'
-    secrets:
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET:  ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_TENANT_ID:  ${{ secrets.ARM_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID:  ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      # terratest creates a real AKS cluster and needs Azure credentials
+      terratest: false
+    secrets: inherit
